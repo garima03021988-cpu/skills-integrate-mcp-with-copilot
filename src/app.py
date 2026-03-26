@@ -88,6 +88,35 @@ def get_activities():
     return activities
 
 
+# In-memory task database (new feature)
+tasks = []
+
+@app.get("/tasks")
+def get_tasks():
+    """Get all tasks (planned, study, unplanned)"""
+    return tasks
+
+
+@app.post("/tasks")
+def create_task(title: str, type: str, description: str = "", due_date: str = None):
+    """Create a new task with type: planned, study, or unplanned"""
+    normalized_type = type.lower()
+    if normalized_type not in {"planned", "study", "unplanned"}:
+        raise HTTPException(status_code=400, detail="Invalid task type")
+
+    task_id = len(tasks) + 1
+    task = {
+        "id": task_id,
+        "title": title,
+        "type": normalized_type,
+        "description": description,
+        "due_date": due_date,
+        "status": "pending"
+    }
+    tasks.append(task)
+    return task
+
+
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: str):
     """Sign up a student for an activity"""
